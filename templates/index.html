@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACDDS — Adaptive Cyber Defense System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo-mark">◈</div>
+    <div>
+      <div class="header-title">ACDDS</div>
+      <div class="header-sub">Adaptive Cyber Deception & Defense System</div>
+    </div>
+  </div>
+  <div class="header-center">
+    <div class="status-pill" id="statusPill">
+      <span class="pulse-dot"></span> SYSTEM ACTIVE
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="header-stat">
+      <span class="stat-label">STEP</span>
+      <span class="stat-val" id="stepCounter">0</span>
+    </div>
+    <div class="header-stat">
+      <span class="stat-label">AVG REWARD</span>
+      <span class="stat-val" id="avgReward">—</span>
+    </div>
+    <button class="btn-reset" onclick="resetSim()">↺ RESET</button>
+  </div>
+</header>
+
+<!-- MAIN GRID -->
+<main class="main-grid">
+
+  <!-- LEFT COLUMN -->
+  <div class="col-left">
+
+    <!-- THREAT METER -->
+    <div class="panel threat-panel">
+      <div class="panel-label">SYSTEM THREAT LEVEL</div>
+      <div class="threat-display">
+        <svg class="threat-gauge" viewBox="0 0 200 110">
+          <defs>
+            <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"   stop-color="#22c55e"/>
+              <stop offset="40%"  stop-color="#f59e0b"/>
+              <stop offset="70%"  stop-color="#f97316"/>
+              <stop offset="100%" stop-color="#ef4444"/>
+            </linearGradient>
+          </defs>
+          <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#1e293b" stroke-width="16"/>
+          <path id="gaugeArc" d="M 20 100 A 80 80 0 0 1 180 100" fill="none"
+                stroke="url(#gaugeGrad)" stroke-width="16"
+                stroke-dasharray="0 251" stroke-linecap="round"/>
+          <text x="100" y="85" text-anchor="middle" class="gauge-num" id="threatNum">0</text>
+          <text x="100" y="100" text-anchor="middle" class="gauge-label-text">THREAT %</text>
+        </svg>
+        <div class="threat-status" id="threatStatus">MONITORING</div>
+      </div>
+    </div>
+
+    <!-- SPEED CONTROL -->
+    <div class="panel control-panel">
+      <div class="panel-label">SIMULATION CONTROLS</div>
+      <div class="control-row">
+        <span class="ctrl-label">SPEED</span>
+        <input type="range" class="slider" id="speedSlider"
+               min="0.2" max="2.0" step="0.1" value="0.8"
+               oninput="setSpeed(this.value)">
+        <span class="ctrl-val" id="speedVal">0.8s</span>
+      </div>
+      <div class="legend-grid">
+        <div class="legend-item"><span class="dot" style="background:#3b82f6"></span>RECON</div>
+        <div class="legend-item"><span class="dot" style="background:#f59e0b"></span>PROBE</div>
+        <div class="legend-item"><span class="dot" style="background:#f97316"></span>EXPLOIT</div>
+        <div class="legend-item"><span class="dot" style="background:#ef4444"></span>ESCALATE</div>
+        <div class="legend-item"><span class="dot" style="background:#6b7280"></span>STEALTH</div>
+      </div>
+    </div>
+
+    <!-- ACTION DISTRIBUTION -->
+    <div class="panel">
+      <div class="panel-label">DEFENSE ACTION DISTRIBUTION</div>
+      <div class="action-bars" id="actionBars">
+        <div class="action-bar-row" data-action="BLOCK">
+          <span class="ab-label">BLOCK</span>
+          <div class="ab-track"><div class="ab-fill" style="background:#ef4444"></div></div>
+          <span class="ab-count">0</span>
+        </div>
+        <div class="action-bar-row" data-action="THROTTLE">
+          <span class="ab-label">THROTTLE</span>
+          <div class="ab-track"><div class="ab-fill" style="background:#f59e0b"></div></div>
+          <span class="ab-count">0</span>
+        </div>
+        <div class="action-bar-row" data-action="DECEIVE">
+          <span class="ab-label">DECEIVE</span>
+          <div class="ab-track"><div class="ab-fill" style="background:#a855f7"></div></div>
+          <span class="ab-count">0</span>
+        </div>
+        <div class="action-bar-row" data-action="OBSERVE">
+          <span class="ab-label">OBSERVE</span>
+          <div class="ab-track"><div class="ab-fill" style="background:#3b82f6"></div></div>
+          <span class="ab-count">0</span>
+        </div>
+        <div class="action-bar-row" data-action="ALLOW">
+          <span class="ab-label">ALLOW</span>
+          <div class="ab-track"><div class="ab-fill" style="background:#22c55e"></div></div>
+          <span class="ab-count">0</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CENTER COLUMN -->
+  <div class="col-center">
+
+    <!-- ATTACKER CARDS -->
+    <div class="panel-label" style="margin-bottom:8px">ACTIVE THREAT ACTORS</div>
+    <div class="attacker-cards" id="attackerCards">
+      <div class="attacker-card" id="card-0">
+        <div class="card-header">
+          <span class="attacker-name">Attacker A</span>
+          <span class="phase-badge" id="phase-0">RECON</span>
+        </div>
+        <div class="card-body">
+          <div class="tactic-desc" id="tactic-0">Initializing...</div>
+          <div class="meter-row">
+            <span class="meter-label">CONFIDENCE</span>
+            <div class="meter-track">
+              <div class="meter-fill conf-fill" id="conf-0" style="width:50%"></div>
+            </div>
+            <span class="meter-val" id="conf-val-0">50%</span>
+          </div>
+          <div class="meter-row">
+            <span class="meter-label">FRUSTRATION</span>
+            <div class="meter-track">
+              <div class="meter-fill frus-fill" id="frus-0" style="width:0%"></div>
+            </div>
+            <span class="meter-val" id="frus-val-0">0%</span>
+          </div>
+          <div class="rate-row">
+            <span class="rate-label">PACKET RATE</span>
+            <span class="rate-val" id="rate-0">—</span>
+          </div>
+          <div class="decision-box" id="decision-0">
+            <span class="decision-label">DEFENDER DECISION</span>
+            <span class="decision-action" id="action-0">—</span>
+            <span class="decision-why" id="why-0">Awaiting data...</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="attacker-card" id="card-1">
+        <div class="card-header">
+          <span class="attacker-name">Attacker B</span>
+          <span class="phase-badge" id="phase-1">RECON</span>
+        </div>
+        <div class="card-body">
+          <div class="tactic-desc" id="tactic-1">Initializing...</div>
+          <div class="meter-row">
+            <span class="meter-label">CONFIDENCE</span>
+            <div class="meter-track">
+              <div class="meter-fill conf-fill" id="conf-1" style="width:50%"></div>
+            </div>
+            <span class="meter-val" id="conf-val-1">50%</span>
+          </div>
+          <div class="meter-row">
+            <span class="meter-label">FRUSTRATION</span>
+            <div class="meter-track">
+              <div class="meter-fill frus-fill" id="frus-1" style="width:0%"></div>
+            </div>
+            <span class="meter-val" id="frus-val-1">0%</span>
+          </div>
+          <div class="rate-row">
+            <span class="rate-label">PACKET RATE</span>
+            <span class="rate-val" id="rate-1">—</span>
+          </div>
+          <div class="decision-box" id="decision-1">
+            <span class="decision-label">DEFENDER DECISION</span>
+            <span class="decision-action" id="action-1">—</span>
+            <span class="decision-why" id="why-1">Awaiting data...</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="attacker-card" id="card-2">
+        <div class="card-header">
+          <span class="attacker-name">Attacker C</span>
+          <span class="phase-badge" id="phase-2">RECON</span>
+        </div>
+        <div class="card-body">
+          <div class="tactic-desc" id="tactic-2">Initializing...</div>
+          <div class="meter-row">
+            <span class="meter-label">CONFIDENCE</span>
+            <div class="meter-track">
+              <div class="meter-fill conf-fill" id="conf-2" style="width:50%"></div>
+            </div>
+            <span class="meter-val" id="conf-val-2">50%</span>
+          </div>
+          <div class="meter-row">
+            <span class="meter-label">FRUSTRATION</span>
+            <div class="meter-track">
+              <div class="meter-fill frus-fill" id="frus-2" style="width:0%"></div>
+            </div>
+            <span class="meter-val" id="frus-val-2">0%</span>
+          </div>
+          <div class="rate-row">
+            <span class="rate-label">PACKET RATE</span>
+            <span class="rate-val" id="rate-2">—</span>
+          </div>
+          <div class="decision-box" id="decision-2">
+            <span class="decision-label">DEFENDER DECISION</span>
+            <span class="decision-action" id="action-2">—</span>
+            <span class="decision-why" id="why-2">Awaiting data...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REWARD CHART -->
+    <div class="panel chart-panel">
+      <div class="panel-label">DEFENSE REWARD — LIVE</div>
+      <canvas id="rewardChart" height="100"></canvas>
+    </div>
+
+  </div>
+
+  <!-- ATTACK INJECTION PANEL -->
+  <div class="panel injection-panel">
+    <div class="panel-label">⚡ MANUAL ATTACK INJECTION</div>
+
+    <div class="injection-section">
+      <div class="injection-subtitle">SCENARIO ATTACKS</div>
+      <div class="inject-buttons">
+        <button class="inject-btn btn-ddos" onclick="injectAttack('all', 'ddos')">
+          <span class="btn-icon">💥</span>
+          <span class="btn-text">COORDINATED DDoS</span>
+          <span class="btn-sub">All attackers → ESCALATE</span>
+        </button>
+        <button class="inject-btn btn-stealth" onclick="injectAttack('all', 'stealth')">
+          <span class="btn-icon">👻</span>
+          <span class="btn-text">STEALTH INFILTRATION</span>
+          <span class="btn-sub">All attackers → RECON</span>
+        </button>
+        <button class="inject-btn btn-exfil" onclick="injectAttack('all', 'exfil')">
+          <span class="btn-icon">📤</span>
+          <span class="btn-text">DATA EXFILTRATION</span>
+          <span class="btn-sub">All attackers → ESCALATE</span>
+        </button>
+        <button class="inject-btn btn-coordinated" onclick="injectAttack('all', 'coordinated')">
+          <span class="btn-icon">🎯</span>
+          <span class="btn-text">APT SIMULATION</span>
+          <span class="btn-sub">Lateral movement attack</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="injection-section">
+      <div class="injection-subtitle">TARGET SPECIFIC ATTACKER</div>
+      <div class="target-grid">
+        <div class="target-col">
+          <div class="target-label">ATTACKER A</div>
+          <button class="target-btn" onclick="injectAttack(0, 'ddos')">DDoS</button>
+          <button class="target-btn" onclick="injectAttack(0, 'brute_force')">Brute Force</button>
+          <button class="target-btn" onclick="injectAttack(0, 'stealth')">Stealth</button>
+        </div>
+        <div class="target-col">
+          <div class="target-label">ATTACKER B</div>
+          <button class="target-btn" onclick="injectAttack(1, 'ddos')">DDoS</button>
+          <button class="target-btn" onclick="injectAttack(1, 'brute_force')">Brute Force</button>
+          <button class="target-btn" onclick="injectAttack(1, 'stealth')">Stealth</button>
+        </div>
+        <div class="target-col">
+          <div class="target-label">ATTACKER C</div>
+          <button class="target-btn" onclick="injectAttack(2, 'ddos')">DDoS</button>
+          <button class="target-btn" onclick="injectAttack(2, 'brute_force')">Brute Force</button>
+          <button class="target-btn" onclick="injectAttack(2, 'stealth')">Stealth</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="injection-section">
+      <div class="inject-controls">
+        <button class="ctrl-btn btn-pause" onclick="togglePause()" id="pauseBtn">⏸ PAUSE</button>
+        <button class="ctrl-btn btn-reset-all" onclick="injectAttack('all', 'reset')">↺ RESET ATTACKERS</button>
+      </div>
+    </div>
+
+    <!-- Injection notification -->
+    <div class="inject-notify" id="injectNotify"></div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="col-right">
+
+    <!-- PHASE TIMELINE -->
+    <div class="panel">
+      <div class="panel-label">PHASE TRANSITION HISTORY</div>
+      <div class="timeline" id="phaseTimeline"></div>
+    </div>
+
+    <!-- EVENT LOG -->
+    <div class="panel log-panel">
+      <div class="panel-label">TACTICAL EVENT LOG</div>
+      <div class="event-log" id="eventLog"></div>
+    </div>
+
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="/static/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+how to open frontend?
+python app.py
+
+how to run backend?
