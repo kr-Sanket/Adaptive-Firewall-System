@@ -7,7 +7,6 @@ import time
 from flask import Flask, render_template, Response, jsonify
 from simulation import SimulationEngine
 
-# Fix paths
 DASHBOARD_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(DASHBOARD_DIR)
 
@@ -16,7 +15,12 @@ app = Flask(__name__,
             static_folder=os.path.join(DASHBOARD_DIR, 'static'))
 
 sim = SimulationEngine()
-simulation_speed = 0.8
+
+# Use a dict so stream always reads current value — fixes pause/resume bug
+state = {
+    "speed": 0.8,
+    "paused": False
+}
 
 
 @app.route('/')
@@ -27,11 +31,11 @@ def index():
 @app.route('/stream')
 def stream():
     def event_stream():
-        global simulation_speed
         while True:
-            data = sim.step_simulation()
-            yield f"data: {json.dumps(data)}\n\n"
-            time.sleep(simulation_speed)
+            if not state["paused"]:
+                data = sim.step_simulation()
+                yield f"data: {json.dumps(data)}\n\n"
+            time.sleep(state["speed"])
 
     return Response(event_stream(), mimetype='text/event-stream')
 
@@ -45,9 +49,8 @@ def reset():
 
 @app.route('/speed/<float:val>', methods=['POST'])
 def set_speed(val):
-    global simulation_speed
-    simulation_speed = max(0.1, min(2.0, val))
-    return jsonify({"speed": simulation_speed})
+    state["speed"] = max(0.1, min(2.0, val))
+    return jsonify({"speed": state["speed"]})
 
 
 @app.route('/inject/<attacker_id>/<attack_type>', methods=['POST'])
@@ -55,17 +58,18 @@ def inject_attack(attacker_id, attack_type):
     result = sim.inject_attack(attacker_id, attack_type)
     return jsonify(result)
 
+
 @app.route('/pause', methods=['POST'])
 def pause():
-    global simulation_speed
-    simulation_speed = 999  # effectively paused
+    state["paused"] = True
     return jsonify({"status": "paused"})
+
 
 @app.route('/resume', methods=['POST'])
 def resume():
-    global simulation_speed
-    simulation_speed = 0.8
+    state["paused"] = False
     return jsonify({"status": "resumed"})
+
 
 if __name__ == '__main__':
     app.run(debug=False, threaded=True)
