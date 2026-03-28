@@ -73,6 +73,12 @@ function updateDashboard(data) {
 
   // Phase timeline
   updateTimeline(data.attackers, data.step);
+
+  // Update explainer
+  if (data.attackers[activeExplainerIdx]?.deep_explanation) {
+    lastExplainerData = data.attackers.map(a => a.deep_explanation);
+    updateExplainer(lastExplainerData[activeExplainerIdx]);
+  }
 }
 
 function updateCard(i, atk) {
@@ -239,4 +245,29 @@ function togglePause() {
     btn.style.color = '#f59e0b';
     paused = false;
   }
+}
+
+// ---- Explainability Layer ----
+let activeExplainerIdx = 0;
+let lastExplainerData = [];
+
+function switchExplainer(idx, btn) {
+  activeExplainerIdx = idx;
+  document.querySelectorAll('.exp-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  if (lastExplainerData[idx]) updateExplainer(lastExplainerData[idx]);
+}
+
+function updateExplainer(exp) {
+  document.getElementById('expAction').textContent = exp.action;
+  document.getElementById('expAction').style.color =
+    actionColors[exp.action] || 'var(--accent)';
+  document.getElementById('expPhase').textContent = exp.phase;
+  document.getElementById('expWhy').textContent = exp.why;
+  document.getElementById('expRisk').textContent = exp.risk;
+  document.getElementById('expStrategy').textContent = exp.strategy;
+  const r = exp.reward;
+  const el = document.getElementById('expReward');
+  el.textContent = (r >= 0 ? '+' : '') + r.toFixed(2);
+  el.style.color = r >= 0 ? '#22c55e' : '#ef4444';
 }

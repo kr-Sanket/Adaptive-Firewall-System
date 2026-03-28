@@ -232,6 +232,39 @@
       <canvas id="rewardChart" height="100"></canvas>
     </div>
 
+    <!-- AI EXPLAINABILITY PANEL -->
+    <div class="panel explainer-panel">
+      <div class="panel-label">🧠 AI DECISION EXPLAINER</div>
+      <div class="explainer-tabs">
+        <button class="exp-tab active" onclick="switchExplainer(0, this)">Attacker A</button>
+        <button class="exp-tab" onclick="switchExplainer(1, this)">Attacker B</button>
+        <button class="exp-tab" onclick="switchExplainer(2, this)">Attacker C</button>
+      </div>
+      <div class="explainer-body" id="explainerBody">
+        <div class="exp-decision">
+          <span class="exp-action" id="expAction">—</span>
+          <span class="exp-arrow">→</span>
+          <span class="exp-phase" id="expPhase">—</span>
+        </div>
+        <div class="exp-section">
+          <div class="exp-label">WHY THIS DECISION</div>
+          <div class="exp-text" id="expWhy">Awaiting data...</div>
+        </div>
+        <div class="exp-section">
+          <div class="exp-label">RISK IF WRONG ACTION</div>
+          <div class="exp-text exp-risk" id="expRisk">—</div>
+        </div>
+        <div class="exp-section">
+          <div class="exp-label">STRATEGY</div>
+          <div class="exp-text exp-strategy" id="expStrategy">—</div>
+        </div>
+        <div class="exp-reward">
+          <span class="exp-reward-label">REWARD EARNED</span>
+          <span class="exp-reward-val" id="expReward">—</span>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- ATTACK INJECTION PANEL -->

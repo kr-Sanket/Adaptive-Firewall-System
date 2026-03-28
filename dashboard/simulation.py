@@ -155,6 +155,7 @@ class SimulationEngine:
                 "action": action,
                 "action_color": ACTION_COLORS[action],
                 "explanation": self.get_explanation(action, attacker.phase),
+                "deep_explanation": self.generate_explanation(attacker, action, reward),  # NEW
             })
 
             # Add to event log
@@ -254,3 +255,72 @@ class SimulationEngine:
         if decision == "THROTTLE":                      return 5
         if decision == "ALLOW" and phase in ["EXPLOIT", "ESCALATE"]: return -25
         return 1
+    
+    def generate_explanation(self, attacker, action, reward):
+        phase = attacker.phase
+        conf = round(attacker.confidence * 100)
+        frus = round(attacker.frustration * 100)
+
+        explanations = {
+            ("BLOCK", "ESCALATE"): {
+                "why": f"Attacker is in full ESCALATE mode with {conf}% confidence. Immediate blocking is critical to prevent system compromise. High packet rate indicates active exploitation attempt.",
+                "risk": "ALLOW during ESCALATE would result in -25 reward penalty — worst case scenario.",
+                "strategy": "Emergency containment — stop escalation immediately"
+            },
+            ("BLOCK", "EXPLOIT"): {
+                "why": f"Active exploitation detected. Attacker confidence at {conf}%. Blocking cuts off the attack vector before damage occurs.",
+                "risk": "Delayed response allows payload injection and credential theft.",
+                "strategy": "Active threat neutralization"
+            },
+            ("DECEIVE", "PROBE"): {
+                "why": f"Attacker is probing with {conf}% confidence. Deception feeds false system information, wasting attacker resources and gathering intelligence without revealing our detection capability.",
+                "risk": "Blocking during PROBE would alert attacker — they would switch tactics.",
+                "strategy": "Honeypot redirection — intelligence-first containment"
+            },
+            ("DECEIVE", "EXPLOIT"): {
+                "why": f"Exploitation attempt detected. Deception redirects attacker to decoy environment, protecting real assets while monitoring their techniques.",
+                "risk": "Direct block would terminate intelligence gathering opportunity.",
+                "strategy": "Active deception — protect real assets via misdirection"
+            },
+            ("OBSERVE", "RECON"): {
+                "why": f"Attacker is in early RECON phase with only {conf}% confidence. Silent observation gathers behavioral intelligence without alerting the attacker.",
+                "risk": "Blocking too early reveals detection capability and pushes attacker to stealth mode.",
+                "strategy": "Passive intelligence gathering — let attacker reveal their tactics"
+            },
+            ("OBSERVE", "PROBE"): {
+                "why": f"Probe attempts detected. Observing allows us to map attacker's target profile before intervening strategically.",
+                "risk": "Premature blocking forces attacker underground into stealth mode.",
+                "strategy": "Tactical patience — build complete threat profile first"
+            },
+            ("THROTTLE", "ESCALATE"): {
+                "why": f"Escalation detected but full blocking would disrupt legitimate traffic. Throttling slows attacker's packet rate while maintaining service availability.",
+                "risk": "Full block would cause service disruption costing 9 operational units.",
+                "strategy": "Controlled degradation — limit damage without full service loss"
+            },
+            ("ALLOW", "RECON"): {
+                "why": f"Early reconnaissance with low confidence ({conf}%). Allowing continues normal operations — threat level too low to justify intervention cost.",
+                "risk": "Over-reacting to RECON wastes defensive resources.",
+                "strategy": "Minimal intervention — conserve defensive resources"
+            },
+        }
+
+        key = (action, phase)
+        if key in explanations:
+            exp = explanations[key]
+        else:
+            exp = {
+                "why": f"Attacker in {phase} phase with {conf}% confidence and {frus}% frustration. Standard {action.lower()} response applied based on behavioral pattern analysis.",
+                "risk": "Suboptimal action selection may reduce reward efficiency.",
+                "strategy": f"Default {action.lower()} policy"
+            }
+
+        return {
+            "action": action,
+            "phase": phase,
+            "confidence": conf,
+            "frustration": frus,
+            "why": exp["why"],
+            "risk": exp["risk"],
+            "strategy": exp["strategy"],
+            "reward": round(reward, 2)
+        }
