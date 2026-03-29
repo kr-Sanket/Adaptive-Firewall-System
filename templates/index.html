@@ -36,6 +36,7 @@
       <span class="stat-label">AVG REWARD</span>
       <span class="stat-val" id="avgReward">—</span>
     </div>
+    <button class="btn-compare" id="compareBtn" onclick="toggleComparison()">⚡ COMPARE MODE</button>
     <button class="btn-reset" onclick="resetSim()">↺ RESET</button>
   </div>
 </header>
@@ -346,6 +347,106 @@
     <div class="inject-notify" id="injectNotify"></div>
   </div>
   <!-- /injection-panel -->
+
+  <!-- ═══════════ COMPARISON MODE OVERLAY ═══════════ -->
+  <div class="comparison-overlay" id="comparisonOverlay" style="display:none">
+    <div class="comparison-header">
+      <div class="comp-side-label static-label">
+        🛡 STATIC FIREWALL
+        <span class="comp-subtitle">Rule-based — threshold decisions only</span>
+      </div>
+      <div class="comp-vs">VS</div>
+      <div class="comp-side-label rl-label">
+        🧠 RL ADAPTIVE DEFENDER
+        <span class="comp-subtitle">Learned strategy — context-aware</span>
+      </div>
+    </div>
+
+    <!-- Score Bar -->
+    <div class="comp-score-bar">
+      <div class="comp-score-item">
+        <span class="comp-score-label">STATIC AVG REWARD</span>
+        <span class="comp-score-val static-score" id="staticScore">—</span>
+      </div>
+      <div class="comp-score-divider"></div>
+      <div class="comp-score-item">
+        <span class="comp-score-label">RL AVG REWARD</span>
+        <span class="comp-score-val rl-score" id="rlScore">—</span>
+      </div>
+      <div class="comp-winner" id="compWinner">—</div>
+    </div>
+
+    <!-- Comparison Cards -->
+    <div class="comp-cards" id="compCards">
+      <div class="comp-attacker-row" id="comp-row-0">
+        <div class="comp-attacker-info">
+          <span class="comp-atk-name">Attacker A</span>
+          <span class="comp-atk-phase" id="comp-phase-0">—</span>
+          <span class="comp-atk-rate" id="comp-rate-0">—</span>
+        </div>
+        <div class="comp-decision static-decision">
+          <span class="comp-dec-label">STATIC DECISION</span>
+          <span class="comp-dec-action" id="static-action-0">—</span>
+          <span class="comp-dec-why" id="static-why-0">—</span>
+          <span class="comp-dec-reward" id="static-reward-0">—</span>
+        </div>
+        <div class="comp-decision rl-decision">
+          <span class="comp-dec-label">RL DECISION</span>
+          <span class="comp-dec-action" id="rl-action-0">—</span>
+          <span class="comp-dec-why" id="rl-why-0">—</span>
+          <span class="comp-dec-reward" id="rl-reward-0">—</span>
+        </div>
+      </div>
+
+      <div class="comp-attacker-row" id="comp-row-1">
+        <div class="comp-attacker-info">
+          <span class="comp-atk-name">Attacker B</span>
+          <span class="comp-atk-phase" id="comp-phase-1">—</span>
+          <span class="comp-atk-rate" id="comp-rate-1">—</span>
+        </div>
+        <div class="comp-decision static-decision">
+          <span class="comp-dec-label">STATIC DECISION</span>
+          <span class="comp-dec-action" id="static-action-1">—</span>
+          <span class="comp-dec-why" id="static-why-1">—</span>
+          <span class="comp-dec-reward" id="static-reward-1">—</span>
+        </div>
+        <div class="comp-decision rl-decision">
+          <span class="comp-dec-label">RL DECISION</span>
+          <span class="comp-dec-action" id="rl-action-1">—</span>
+          <span class="comp-dec-why" id="rl-why-1">—</span>
+          <span class="comp-dec-reward" id="rl-reward-1">—</span>
+        </div>
+      </div>
+
+      <div class="comp-attacker-row" id="comp-row-2">
+        <div class="comp-attacker-info">
+          <span class="comp-atk-name">Attacker C</span>
+          <span class="comp-atk-phase" id="comp-phase-2">—</span>
+          <span class="comp-atk-rate" id="comp-rate-2">—</span>
+        </div>
+        <div class="comp-decision static-decision">
+          <span class="comp-dec-label">STATIC DECISION</span>
+          <span class="comp-dec-action" id="static-action-2">—</span>
+          <span class="comp-dec-why" id="static-why-2">—</span>
+          <span class="comp-dec-reward" id="static-reward-2">—</span>
+        </div>
+        <div class="comp-decision rl-decision">
+          <span class="comp-dec-label">RL DECISION</span>
+          <span class="comp-dec-action" id="rl-action-2">—</span>
+          <span class="comp-dec-why" id="rl-why-2">—</span>
+          <span class="comp-dec-reward" id="rl-reward-2">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Chart -->
+    <div class="comp-chart-row">
+      <div class="comp-chart-panel">
+        <div class="comp-chart-label">REWARD COMPARISON — LIVE</div>
+        <canvas id="compChart" height="80"></canvas>
+      </div>
+    </div>
+  </div>
 
 </main>
 

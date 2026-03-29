@@ -51,30 +51,29 @@ evtSource.onmessage = function(e) {
 };
 
 function updateDashboard(data) {
-  // Header stats
+  // Always update header stats
   document.getElementById('stepCounter').textContent = data.step;
+
+  if (data.mode === 'comparison') {
+    // In comparison mode — only update comparison panel
+    const avg = data.rl_avg_reward;
+    document.getElementById('avgReward').textContent =
+      (avg >= 0 ? '+' : '') + avg.toFixed(2);
+    updateComparison(data);
+    return; // skip normal dashboard updates
+  }
+
+  // Normal mode updates
   document.getElementById('avgReward').textContent =
     (data.avg_reward >= 0 ? '+' : '') + data.avg_reward.toFixed(2);
 
-  // Threat gauge
   updateThreatGauge(data.threat_level);
-
-  // Attacker cards
   data.attackers.forEach((atk, i) => updateCard(i, atk));
-
-  // Reward chart
   updateChart(data.reward_history);
-
-  // Action distribution
   updateActionBars(data.action_totals);
-
-  // Event log
   updateEventLog(data.event_log);
-
-  // Phase timeline
   updateTimeline(data.attackers, data.step);
 
-  // Update explainer
   if (data.attackers[activeExplainerIdx]?.deep_explanation) {
     lastExplainerData = data.attackers.map(a => a.deep_explanation);
     updateExplainer(lastExplainerData[activeExplainerIdx]);
@@ -270,4 +269,155 @@ function updateExplainer(exp) {
   const el = document.getElementById('expReward');
   el.textContent = (r >= 0 ? '+' : '') + r.toFixed(2);
   el.style.color = r >= 0 ? '#22c55e' : '#ef4444';
+}
+
+// ---- Comparison Mode ----
+let comparisonActive = false;
+
+// Comparison chart
+const compCtx = document.getElementById('compChart').getContext('2d');
+const compChart = new Chart(compCtx, {
+  type: 'line',
+  data: {
+    labels: [],
+    datasets: [
+      {
+        label: 'RL Defender',
+        data: [],
+        borderColor: '#00c8f0',
+        backgroundColor: 'rgba(0,200,240,0.06)',
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: true,
+        tension: 0.4,
+      },
+      {
+        label: 'Static Firewall',
+        data: [],
+        borderColor: '#f0a020',
+        backgroundColor: 'rgba(240,160,32,0.06)',
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: true,
+        tension: 0.4,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    animation: false,
+    plugins: {
+      legend: {
+        display: true,
+        labels: {
+          color: '#8fa8c0',
+          font: { family: 'Share Tech Mono', size: 10 },
+          boxWidth: 12,
+        }
+      }
+    },
+    scales: {
+      x: { display: false },
+      y: {
+        grid: { color: 'rgba(26,48,80,0.5)' },
+        ticks: { color: '#4e6580', font: { family: 'Share Tech Mono', size: 10 } }
+      }
+    }
+  }
+});
+
+let rlRewardHistory = [];
+let staticRewardHistory = [];
+
+function toggleComparison() {
+  comparisonActive = !comparisonActive;
+  const btn = document.getElementById('compareBtn');
+  const overlay = document.getElementById('comparisonOverlay');
+
+  if (comparisonActive) {
+    btn.classList.add('active');
+    btn.textContent = '✕ EXIT COMPARE';
+    overlay.style.display = 'block';
+    fetch('/mode/comparison', { method: 'POST' });
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = '⚡ COMPARE MODE';
+    overlay.style.display = 'none';
+    fetch('/mode/normal', { method: 'POST' });
+  }
+}
+
+function updateComparison(data) {
+  if (!data.comparison) return;
+
+  // Scores
+  const rl = data.rl_avg_reward;
+  const st = data.static_avg_reward;
+
+  document.getElementById('rlScore').textContent =
+    (rl >= 0 ? '+' : '') + rl.toFixed(2);
+  document.getElementById('staticScore').textContent =
+    (st >= 0 ? '+' : '') + st.toFixed(2);
+
+  const winner = document.getElementById('compWinner');
+  if (rl > st) {
+    winner.textContent = '🧠 RL DEFENDER WINNING';
+    winner.style.color = '#00c8f0';
+  } else if (st > rl) {
+    winner.textContent = '🛡 STATIC LEADING';
+    winner.style.color = '#f0a020';
+  } else {
+    winner.textContent = 'TIED';
+    winner.style.color = '#4e6580';
+  }
+
+  // Per-attacker rows
+  data.comparison.forEach((atk, i) => {
+    const phase = document.getElementById(`comp-phase-${i}`);
+    phase.textContent = atk.phase;
+    phase.style.background = atk.phase_color + '22';
+    phase.style.color = atk.phase_color;
+    phase.style.borderColor = atk.phase_color;
+
+    document.getElementById(`comp-rate-${i}`).textContent = atk.rate + ' pps';
+
+    // Static side
+    const sa = document.getElementById(`static-action-${i}`);
+    sa.textContent = atk.static_action;
+    sa.style.color = atk.static_color;
+    document.getElementById(`static-why-${i}`).textContent = atk.static_explanation;
+    const sr = document.getElementById(`static-reward-${i}`);
+    sr.textContent = 'Reward: ' + (atk.static_reward >= 0 ? '+' : '') + atk.static_reward;
+    sr.style.color = atk.static_reward >= 0 ? '#22c55e' : '#f04444';
+
+    // RL side
+    const ra = document.getElementById(`rl-action-${i}`);
+    ra.textContent = atk.rl_action;
+    ra.style.color = atk.rl_color;
+    document.getElementById(`rl-why-${i}`).textContent = atk.rl_explanation;
+    const rr = document.getElementById(`rl-reward-${i}`);
+    rr.textContent = 'Reward: ' + (atk.rl_reward >= 0 ? '+' : '') + atk.rl_reward;
+    rr.style.color = atk.rl_reward >= 0 ? '#22c55e' : '#f04444';
+
+    // Highlight rows where decisions differ
+    const row = document.getElementById(`comp-row-${i}`);
+    if (atk.rl_action !== atk.static_action) {
+      row.style.borderColor = 'rgba(0,200,240,0.3)';
+    } else {
+      row.style.borderColor = 'var(--border)';
+    }
+  });
+
+  // Comparison chart
+  rlRewardHistory.push(rl);
+  staticRewardHistory.push(st);
+  if (rlRewardHistory.length > 80) {
+    rlRewardHistory.shift();
+    staticRewardHistory.shift();
+  }
+
+  compChart.data.labels = rlRewardHistory.map((_, i) => i);
+  compChart.data.datasets[0].data = rlRewardHistory;
+  compChart.data.datasets[1].data = staticRewardHistory;
+  compChart.update('none');
 }

@@ -1092,3 +1092,238 @@ body::after {
   margin-bottom: 10px;
   text-transform: uppercase;
 }
+
+/* ── COMPARE BUTTON ── */
+.btn-compare {
+  background: rgba(160,96,240,0.1);
+  border: 1px solid rgba(160,96,240,0.35);
+  color: var(--purple);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  letter-spacing: 1.5px;
+  transition: all var(--transition);
+}
+
+.btn-compare:hover,
+.btn-compare.active {
+  background: rgba(160,96,240,0.2);
+  border-color: var(--purple);
+  box-shadow: 0 0 10px rgba(160,96,240,0.2);
+}
+
+/* ── COMPARISON OVERLAY ── */
+.comparison-overlay {
+  position: fixed;
+  inset: 58px 0 0 0;
+  background: var(--bg);
+  z-index: 90;
+  overflow-y: auto;
+  padding: 16px 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.comparison-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.comp-side-label {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  flex: 1;
+}
+
+.static-label { color: var(--warn); }
+.rl-label     { color: var(--accent); text-align: right; }
+
+.comp-subtitle {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  margin-top: 3px;
+  font-weight: 400;
+}
+
+.comp-vs {
+  font-family: var(--font-ui);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--muted);
+  padding: 0 30px;
+  letter-spacing: 4px;
+}
+
+/* SCORE BAR */
+.comp-score-bar {
+  display: flex;
+  align-items: center;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 20px;
+  margin-bottom: 14px;
+  gap: 20px;
+}
+
+.comp-score-item { flex: 1; }
+
+.comp-score-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+
+.comp-score-val {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.static-score { color: var(--warn); }
+.rl-score     { color: var(--accent); }
+
+.comp-score-divider {
+  width: 1px;
+  height: 40px;
+  background: var(--border);
+}
+
+.comp-winner {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--safe);
+  text-align: center;
+  flex: 1;
+}
+
+/* COMPARISON ROWS */
+.comp-attacker-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 1fr;
+  gap: 12px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  align-items: start;
+  transition: border-color 0.3s;
+}
+
+.comp-attacker-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 12px;
+  border-right: 1px solid var(--border);
+}
+
+.comp-atk-name {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+
+.comp-atk-phase {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  display: inline-block;
+}
+
+.comp-atk-rate {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+}
+
+.comp-decision {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+}
+
+.static-decision {
+  background: rgba(240,160,32,0.05);
+  border: 1px solid rgba(240,160,32,0.2);
+}
+
+.rl-decision {
+  background: rgba(0,200,240,0.05);
+  border: 1px solid rgba(0,200,240,0.2);
+}
+
+.comp-dec-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--muted);
+  letter-spacing: 2px;
+}
+
+.comp-dec-action {
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  transition: color 0.3s;
+}
+
+.comp-dec-why {
+  font-family: var(--font-body);
+  font-size: 10px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+.comp-dec-reward {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+/* COMPARISON CHART */
+.comp-chart-row { margin-top: 10px; }
+
+.comp-chart-panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+}
+
+.comp-chart-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}

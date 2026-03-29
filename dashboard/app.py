@@ -16,10 +16,10 @@ app = Flask(__name__,
 
 sim = SimulationEngine()
 
-# Use a dict so stream always reads current value — fixes pause/resume bug
 state = {
     "speed": 0.8,
-    "paused": False
+    "paused": False,
+    "mode": "normal"  # "normal" or "comparison"
 }
 
 
@@ -33,10 +33,14 @@ def stream():
     def event_stream():
         while True:
             if not state["paused"]:
-                data = sim.step_simulation()
+                if state["mode"] == "comparison":
+                    data = sim.step_comparison()
+                    data["mode"] = "comparison"
+                else:
+                    data = sim.step_simulation()
+                    data["mode"] = "normal"
                 yield f"data: {json.dumps(data)}\n\n"
             time.sleep(state["speed"])
-
     return Response(event_stream(), mimetype='text/event-stream')
 
 
@@ -69,6 +73,13 @@ def pause():
 def resume():
     state["paused"] = False
     return jsonify({"status": "resumed"})
+
+
+@app.route('/mode/<m>', methods=['POST'])
+def set_mode(m):
+    if m in ("normal", "comparison"):
+        state["mode"] = m
+    return jsonify({"mode": state["mode"]})
 
 
 if __name__ == '__main__':

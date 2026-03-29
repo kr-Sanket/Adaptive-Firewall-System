@@ -68,12 +68,43 @@ ACTION_EXPLANATIONS = {
     ("ALLOW",    "RECON"):    "Allowing reconnaissance — low risk phase",
 }
 
+class StaticFirewall:
+    """
+    Rule-based firewall — represents traditional defense.
+    Makes decisions purely on packet rate thresholds.
+    No learning, no strategy, no context awareness.
+    """
+    STATIC_ACTION_COLORS = {
+        "BLOCK":    "#ef4444",
+        "THROTTLE": "#f59e0b",
+        "ALLOW":    "#22c55e",
+    }
+
+    def decide(self, rate, failed_logins):
+        if rate > 400 or failed_logins > 10:
+            return "BLOCK"
+        elif rate > 200 or failed_logins > 3:
+            return "THROTTLE"
+        else:
+            return "ALLOW"
+
+    def get_color(self, action):
+        return self.STATIC_ACTION_COLORS.get(action, "#64748b")
+
+    def get_explanation(self, action, rate):
+        if action == "BLOCK":
+            return f"Rate {rate} pps exceeds threshold (400) — blocked by static rule"
+        elif action == "THROTTLE":
+            return f"Rate {rate} pps exceeds warning threshold (200) — throttled"
+        else:
+            return f"Rate {rate} pps within normal range — allowed"
 
 class SimulationEngine:
     def __init__(self):
         self.env = MultiAttackerEnvironment(num_attackers=3)
         self.trackers = [BehaviorTracker(window_size=10) for _ in range(3)]
         self.cost_model = DefenseCostModel()
+        self.static_firewall = StaticFirewall()
 
         self.agent = DQNAgent(state_dim=9, actions=ACTIONS)
         model_path = os.path.join(
@@ -239,6 +270,122 @@ class SimulationEngine:
                 attacker.current_tactic = "slow_scan"
 
         return {"status": "injected", "type": attack_type}
+    
+    def step_comparison(self):
+        """
+        Runs one step for both static firewall and RL defender
+        on the same attackers simultaneously for comparison.
+        """
+        self.step += 1
+        states = []
+
+        for i, attacker in enumerate(self.env.attackers):
+            activity = attacker.generate_activity()
+            self.trackers[i].update(activity["rate"])
+            behavioral = self.trackers[i].get_features()
+            phase_enc = np.array(
+                PHASE_ENCODING[attacker.phase], dtype=np.float32
+            )
+            state = np.concatenate([behavioral, phase_enc])
+            states.append((state, activity, attacker))
+
+        comparison_data = []
+        rl_total_reward = 0
+        static_total_reward = 0
+
+        for i, (state, activity, attacker) in enumerate(states):
+            rate = int(activity["rate"])
+            failed = activity.get("failed_logins", 0)
+
+            # RL defender decision
+            action_idx = self.agent.act(state)
+            rl_action = ACTIONS[action_idx]
+            cost = self.cost_model.get_cost(rl_action)
+            rl_reward = self._reward(action_idx, attacker.phase) - cost * 0.5
+            rl_total_reward += rl_reward
+
+            # Static firewall decision
+            static_action = self.static_firewall.decide(rate, failed)
+            static_reward = self._static_reward(static_action, attacker.phase)
+            static_total_reward += static_reward
+
+            # Attacker reacts to RL defender (RL is the real system)
+            attacker.update_strategy(rl_action)
+
+            self.action_totals[rl_action] += 1
+            self.rate_history[i].append(rate)
+            if len(self.rate_history[i]) > 50:
+                self.rate_history[i].pop(0)
+
+            self.event_log.insert(0, {
+                "step": self.step,
+                "attacker": f"Attacker {chr(65+i)}",
+                "phase": attacker.phase,
+                "tactic": activity.get("type", "unknown"),
+                "action": rl_action,
+                "action_color": ACTION_COLORS[rl_action],
+                "phase_color": PHASE_COLORS[attacker.phase],
+                "reward": round(rl_reward, 2),
+            })
+
+            comparison_data.append({
+                "id": i,
+                "name": f"Attacker {chr(65+i)}",
+                "phase": attacker.phase,
+                "phase_color": PHASE_COLORS[attacker.phase],
+                "tactic_desc": TACTIC_DESCRIPTIONS.get(
+                    activity.get("type", "unknown"), "Unknown activity"
+                ),
+                "rate": rate,
+                "confidence": round(attacker.confidence * 100),
+                "frustration": round(attacker.frustration * 100),
+                # RL defender
+                "rl_action": rl_action,
+                "rl_color": ACTION_COLORS[rl_action],
+                "rl_reward": round(rl_reward, 2),
+                "rl_explanation": self.get_explanation(rl_action, attacker.phase),
+                # Static firewall
+                "static_action": static_action,
+                "static_color": self.static_firewall.get_color(static_action),
+                "static_reward": round(static_reward, 2),
+                "static_explanation": self.static_firewall.get_explanation(
+                    static_action, rate
+                ),
+            })
+
+        self.event_log = self.event_log[:100]
+
+        rl_avg = round(rl_total_reward / 3, 2)
+        static_avg = round(static_total_reward / 3, 2)
+
+        self.reward_history.append(rl_avg)
+        if len(self.reward_history) > 80:
+            self.reward_history.pop(0)
+
+        phases = [c["phase"] for c in comparison_data]
+        threat_level = self.get_threat_level(phases)
+
+        return {
+            "step": self.step,
+            "comparison": comparison_data,
+            "threat_level": threat_level,
+            "rl_avg_reward": rl_avg,
+            "static_avg_reward": static_avg,
+            "reward_history": self.reward_history,
+            "action_totals": self.action_totals.copy(),
+            "event_log": self.event_log[:20],
+        }
+
+    def _static_reward(self, action, phase):
+        """Reward function applied to static firewall decisions for fair comparison."""
+        if action == "BLOCK" and phase == "ESCALATE": return 18
+        if action == "BLOCK" and phase == "EXPLOIT":  return 12
+        if action == "BLOCK" and phase == "RECON":    return -4
+        if action == "BLOCK" and phase == "PROBE":    return -2
+        if action == "THROTTLE" and phase == "ESCALATE": return 8
+        if action == "THROTTLE": return 5
+        if action == "ALLOW" and phase in ["EXPLOIT", "ESCALATE"]: return -25
+        return 1
 
     def _reward(self, action, phase):
         decision = ACTIONS[action]
