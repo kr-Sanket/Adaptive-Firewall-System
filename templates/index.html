@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ACDDS — Adaptive Cyber Defense System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Sora:wght@300;400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
@@ -13,9 +13,15 @@
 <!-- ═══════════ HEADER ═══════════ -->
 <header class="header">
   <div class="header-left">
-    <div class="logo-mark">◈</div>
+    <div class="logo-mark">
+      <!-- Shield icon -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L4 6v6c0 5.25 3.4 10.15 8 11.4C16.6 22.15 20 17.25 20 12V6l-8-4z"/>
+        <path d="M9 12l2 2 4-4"/>
+      </svg>
+    </div>
     <div class="header-brand">
-      <div class="header-title">ACDDS</div>
+      <div class="header-title">ACD<span>DS</span></div>
       <div class="header-sub">Adaptive Cyber Deception &amp; Defense System</div>
     </div>
   </div>
@@ -36,8 +42,37 @@
       <span class="stat-label">AVG REWARD</span>
       <span class="stat-val" id="avgReward">—</span>
     </div>
-    <button class="btn-compare" id="compareBtn" onclick="toggleComparison()">⚡ COMPARE MODE</button>
-    <button class="btn-reset" onclick="resetSim()">↺ RESET</button>
+
+    <!-- Theme Toggle -->
+    <button class="btn-theme" id="themeToggle" onclick="toggleTheme()" title="Toggle light / dark">
+      <!-- sun (shown in dark mode) -->
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"/>
+        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+      </svg>
+      <!-- moon (shown in light mode) -->
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+
+    <button class="btn-compare" id="compareBtn" onclick="toggleComparison()">
+      <!-- Columns icon -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="18" rx="1"/>
+        <rect x="14" y="3" width="7" height="18" rx="1"/>
+      </svg>
+      COMPARE
+    </button>
+
+    <button class="btn-reset" onclick="resetSim()">
+      <!-- Rotate icon -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 4v6h6M23 20v-6h-6"/>
+        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/>
+      </svg>
+      RESET
+    </button>
   </div>
 </header>
 
@@ -49,20 +84,27 @@
 
     <!-- Threat Meter -->
     <div class="panel threat-panel">
-      <div class="panel-label">System Threat Level</div>
+      <div class="panel-label">
+        <span class="panel-label-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </span>
+        System Threat Level
+      </div>
       <div class="threat-display">
         <svg class="threat-gauge" viewBox="0 0 200 115">
           <defs>
             <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%"   stop-color="#00e676"/>
-              <stop offset="40%"  stop-color="#ffaa00"/>
-              <stop offset="70%"  stop-color="#ff6b30"/>
-              <stop offset="100%" stop-color="#ff3b3b"/>
+              <stop offset="0%"   stop-color="#2e9e6b"/>
+              <stop offset="40%"  stop-color="#d48b3a"/>
+              <stop offset="70%"  stop-color="#d4714a"/>
+              <stop offset="100%" stop-color="#d95b5b"/>
             </linearGradient>
           </defs>
-          <path d="M 20 105 A 80 80 0 0 1 180 105" fill="none" stroke="#0e2140" stroke-width="14"/>
+          <path d="M 20 105 A 80 80 0 0 1 180 105" fill="none" class="gauge-track-bg" stroke-width="12"/>
           <path id="gaugeArc" d="M 20 105 A 80 80 0 0 1 180 105" fill="none"
-                stroke="url(#gaugeGrad)" stroke-width="14"
+                stroke="url(#gaugeGrad)" stroke-width="12"
                 stroke-dasharray="0 251" stroke-linecap="round"/>
           <text x="100" y="90"  text-anchor="middle" class="gauge-num" id="threatNum">0</text>
           <text x="100" y="106" text-anchor="middle" class="gauge-label-text">THREAT %</text>
@@ -73,7 +115,14 @@
 
     <!-- Simulation Controls -->
     <div class="panel">
-      <div class="panel-label">Simulation Controls</div>
+      <div class="panel-label">
+        <span class="panel-label-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+          </svg>
+        </span>
+        Simulation Controls
+      </div>
       <div class="control-row">
         <span class="ctrl-label">SPEED</span>
         <input type="range" class="slider" id="speedSlider"
@@ -82,67 +131,95 @@
         <span class="ctrl-val" id="speedVal">0.8s</span>
       </div>
       <div class="legend-grid">
-        <div class="legend-item"><span class="dot" style="background:#3b82f6"></span>RECON</div>
-        <div class="legend-item"><span class="dot" style="background:#ffaa00"></span>PROBE</div>
-        <div class="legend-item"><span class="dot" style="background:#ff6b30"></span>EXPLOIT</div>
-        <div class="legend-item"><span class="dot" style="background:#ff3b3b"></span>ESCALATE</div>
-        <div class="legend-item"><span class="dot" style="background:#4d5e70"></span>STEALTH</div>
+        <div class="legend-item"><span class="dot" style="background:#4a7cc7"></span>RECON</div>
+        <div class="legend-item"><span class="dot" style="background:#d48b3a"></span>PROBE</div>
+        <div class="legend-item"><span class="dot" style="background:#d4714a"></span>EXPLOIT</div>
+        <div class="legend-item"><span class="dot" style="background:#d95b5b"></span>ESCALATE</div>
+        <div class="legend-item"><span class="dot" style="background:#7c62c7"></span>STEALTH</div>
       </div>
     </div>
 
     <!-- Action Distribution -->
     <div class="panel">
-      <div class="panel-label">Defense Action Distribution</div>
+      <div class="panel-label">
+        <span class="panel-label-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+        </span>
+        Defense Action Distribution
+      </div>
       <div class="action-bars" id="actionBars">
         <div class="action-bar-row" data-action="BLOCK">
           <span class="ab-label">BLOCK</span>
-          <div class="ab-track"><div class="ab-fill" style="background:#ff3b3b"></div></div>
+          <div class="ab-track"><div class="ab-fill" style="background:#d95b5b"></div></div>
           <span class="ab-count">0</span>
         </div>
         <div class="action-bar-row" data-action="THROTTLE">
           <span class="ab-label">THROTTLE</span>
-          <div class="ab-track"><div class="ab-fill" style="background:#ffaa00"></div></div>
+          <div class="ab-track"><div class="ab-fill" style="background:#d48b3a"></div></div>
           <span class="ab-count">0</span>
         </div>
         <div class="action-bar-row" data-action="DECEIVE">
           <span class="ab-label">DECEIVE</span>
-          <div class="ab-track"><div class="ab-fill" style="background:#b060ff"></div></div>
+          <div class="ab-track"><div class="ab-fill" style="background:#7c62c7"></div></div>
           <span class="ab-count">0</span>
         </div>
         <div class="action-bar-row" data-action="OBSERVE">
           <span class="ab-label">OBSERVE</span>
-          <div class="ab-track"><div class="ab-fill" style="background:#3b82f6"></div></div>
+          <div class="ab-track"><div class="ab-fill" style="background:#4a7cc7"></div></div>
           <span class="ab-count">0</span>
         </div>
         <div class="action-bar-row" data-action="ALLOW">
           <span class="ab-label">ALLOW</span>
-          <div class="ab-track"><div class="ab-fill" style="background:#00e676"></div></div>
+          <div class="ab-track"><div class="ab-fill" style="background:#2e9e6b"></div></div>
           <span class="ab-count">0</span>
         </div>
       </div>
     </div>
 
-    <!-- Phase Timeline (moved here from right col) -->
+    <!-- Phase Timeline -->
     <div class="panel">
-      <div class="panel-label">Phase Transition History</div>
+      <div class="panel-label">
+        <span class="panel-label-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </span>
+        Phase Transition History
+      </div>
       <div class="timeline" id="phaseTimeline"></div>
     </div>
 
-  </div>
-  <!-- /col-left -->
+  </div><!-- /col-left -->
 
-  <!-- ── CENTER COLUMN (spans 2 grid cols) ── -->
+  <!-- ── CENTER COLUMN ── -->
   <div class="col-center">
 
     <!-- Attacker Cards -->
     <div class="panel" style="padding-bottom:14px">
-      <div class="panel-label">Active Threat Actors</div>
+      <div class="panel-label">
+        <span class="panel-label-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </span>
+        Active Threat Actors
+      </div>
       <div class="attacker-cards" id="attackerCards">
 
         <!-- Card A -->
         <div class="attacker-card" id="card-0">
           <div class="card-header">
-            <span class="attacker-name">Attacker A</span>
+            <div class="card-header-left">
+              <div class="attacker-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                </svg>
+              </div>
+              <span class="attacker-name">Attacker A</span>
+            </div>
             <span class="phase-badge" id="phase-0">RECON</span>
           </div>
           <div class="card-body">
@@ -172,7 +249,14 @@
         <!-- Card B -->
         <div class="attacker-card" id="card-1">
           <div class="card-header">
-            <span class="attacker-name">Attacker B</span>
+            <div class="card-header-left">
+              <div class="attacker-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                </svg>
+              </div>
+              <span class="attacker-name">Attacker B</span>
+            </div>
             <span class="phase-badge" id="phase-1">RECON</span>
           </div>
           <div class="card-body">
@@ -202,7 +286,14 @@
         <!-- Card C -->
         <div class="attacker-card" id="card-2">
           <div class="card-header">
-            <span class="attacker-name">Attacker C</span>
+            <div class="card-header-left">
+              <div class="attacker-avatar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                </svg>
+              </div>
+              <span class="attacker-name">Attacker C</span>
+            </div>
             <span class="phase-badge" id="phase-2">RECON</span>
           </div>
           <div class="card-body">
@@ -234,13 +325,27 @@
 
     <!-- Reward Chart -->
     <div class="panel chart-panel">
-      <div class="panel-label">Defense Reward — Live</div>
+      <div class="panel-label">
+        <span class="panel-label-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </span>
+        Defense Reward — Live
+      </div>
       <canvas id="rewardChart" height="90"></canvas>
     </div>
 
     <!-- AI Decision Explainer -->
     <div class="panel explainer-panel">
-      <div class="panel-label">🧠 AI Decision Explainer</div>
+      <div class="panel-label">
+        <span class="panel-label-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+          </svg>
+        </span>
+        AI Decision Explainer
+      </div>
       <div class="explainer-tabs">
         <button class="exp-tab active" onclick="switchExplainer(0, this)">Attacker A</button>
         <button class="exp-tab" onclick="switchExplainer(1, this)">Attacker B</button>
@@ -271,40 +376,80 @@
       </div>
     </div>
 
-    <!-- Event Log (moved here from right col) -->
+    <!-- Event Log -->
     <div class="panel log-panel">
-      <div class="panel-label">Tactical Event Log</div>
+      <div class="panel-label">
+        <span class="panel-label-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        </span>
+        Tactical Event Log
+      </div>
       <div class="event-log" id="eventLog"></div>
     </div>
 
-  </div>
-  <!-- /col-center -->
+  </div><!-- /col-center -->
 
-  <!-- ── INJECTION PANEL (col 4) ── -->
+  <!-- ── INJECTION PANEL ── -->
   <div class="panel injection-panel">
-    <div class="panel-label">⚡ Manual Attack Injection</div>
+    <div class="panel-label">
+      <span class="panel-label-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+      </span>
+      Manual Attack Injection
+    </div>
 
     <!-- Scenario Attacks -->
     <div class="injection-section">
-      <div class="injection-subtitle">Scenario Attacks</div>
+      <div class="injection-subtitle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        Scenario Attacks
+      </div>
       <div class="inject-buttons">
         <button class="inject-btn btn-ddos" onclick="injectAttack('all', 'ddos')">
-          <span class="btn-icon">💥</span>
+          <span class="btn-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+            </svg>
+          </span>
           <span class="btn-text">Coordinated DDoS</span>
           <span class="btn-sub">All attackers → ESCALATE</span>
         </button>
         <button class="inject-btn btn-stealth" onclick="injectAttack('all', 'stealth')">
-          <span class="btn-icon">👻</span>
+          <span class="btn-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+          </span>
           <span class="btn-text">Stealth Infiltration</span>
           <span class="btn-sub">All attackers → RECON</span>
         </button>
         <button class="inject-btn btn-exfil" onclick="injectAttack('all', 'exfil')">
-          <span class="btn-icon">📤</span>
+          <span class="btn-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+              <path d="M9 18H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/>
+            </svg>
+          </span>
           <span class="btn-text">Data Exfiltration</span>
           <span class="btn-sub">All attackers → ESCALATE</span>
         </button>
         <button class="inject-btn btn-coordinated" onclick="injectAttack('all', 'coordinated')">
-          <span class="btn-icon">🎯</span>
+          <span class="btn-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20"/>
+            </svg>
+          </span>
           <span class="btn-text">APT Simulation</span>
           <span class="btn-sub">Lateral movement attack</span>
         </button>
@@ -313,7 +458,12 @@
 
     <!-- Target Specific -->
     <div class="injection-section">
-      <div class="injection-subtitle">Target Specific Attacker</div>
+      <div class="injection-subtitle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+        </svg>
+        Target Specific Attacker
+      </div>
       <div class="target-grid">
         <div class="target-col">
           <div class="target-label">Attacker A</div>
@@ -339,25 +489,41 @@
     <!-- Controls -->
     <div class="injection-section">
       <div class="inject-controls">
-        <button class="ctrl-btn btn-pause" onclick="togglePause()" id="pauseBtn">⏸ PAUSE</button>
-        <button class="ctrl-btn btn-reset-all" onclick="injectAttack('all', 'reset')">↺ RESET ATTACKERS</button>
+        <button class="ctrl-btn btn-pause" onclick="togglePause()" id="pauseBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
+          </svg>
+          PAUSE
+        </button>
+        <button class="ctrl-btn btn-reset-all" onclick="injectAttack('all', 'reset')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 4v6h6M23 20v-6h-6"/>
+            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/>
+          </svg>
+          RESET ATTACKERS
+        </button>
       </div>
     </div>
 
     <div class="inject-notify" id="injectNotify"></div>
-  </div>
-  <!-- /injection-panel -->
+  </div><!-- /injection-panel -->
 
-  <!-- ═══════════ COMPARISON MODE OVERLAY ═══════════ -->
+  <!-- ═══════════ COMPARISON OVERLAY ═══════════ -->
   <div class="comparison-overlay" id="comparisonOverlay" style="display:none">
     <div class="comparison-header">
       <div class="comp-side-label static-label">
-        🛡 STATIC FIREWALL
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;display:inline-block;vertical-align:middle;margin-right:7px;">
+          <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        STATIC FIREWALL
         <span class="comp-subtitle">Rule-based — threshold decisions only</span>
       </div>
       <div class="comp-vs">VS</div>
       <div class="comp-side-label rl-label">
-        🧠 RL ADAPTIVE DEFENDER
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;display:inline-block;vertical-align:middle;margin-right:7px;">
+          <path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 8v4l2 2"/><path d="M18 2l4 4-4 4M22 6H14"/>
+        </svg>
+        RL ADAPTIVE DEFENDER
         <span class="comp-subtitle">Learned strategy — context-aware</span>
       </div>
     </div>
@@ -397,7 +563,6 @@
           <span class="comp-dec-reward" id="rl-reward-0">—</span>
         </div>
       </div>
-
       <div class="comp-attacker-row" id="comp-row-1">
         <div class="comp-attacker-info">
           <span class="comp-atk-name">Attacker B</span>
@@ -417,7 +582,6 @@
           <span class="comp-dec-reward" id="rl-reward-1">—</span>
         </div>
       </div>
-
       <div class="comp-attacker-row" id="comp-row-2">
         <div class="comp-attacker-info">
           <span class="comp-atk-name">Attacker C</span>
@@ -451,6 +615,18 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+/* ── Theme toggle (inline so it works without dashboard.js) ── */
+function toggleTheme() {
+  const html = document.documentElement;
+  html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('acdds-theme', html.dataset.theme);
+}
+(function(){
+  const saved = localStorage.getItem('acdds-theme');
+  if (saved) document.documentElement.dataset.theme = saved;
+})();
+</script>
 <script src="/static/js/dashboard.js"></script>
 </body>
 </html>
